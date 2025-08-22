@@ -1,0 +1,22 @@
+### Testar a rota do último dado (com token)
+GET http://localhost:3000/api/telemetry/latest
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZlZTlhNjlmLTViZTItNDhkNS1hY2QwLWQ5NmFlN2M4ZjAwZiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6Imp1aXoiLCJpYXQiOjE3NTU4Mjc5MDAsImV4cCI6MTc1NTkxNDMwMH0.-Hz9FwXda7n8ckv_ppzQGUs1PbDoGEaD5lYo5JS6mjc
+
+
+### Testar a rota de dados históricos (com token)
+# Altere as datas para um período em que você enviou dados via MQTT
+GET http://localhost:3000/api/telemetry/history?startDate=2025-08-22T02:01:33Z&endDate=2025-08-22T02:03:39Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZlZTlhNjlmLTViZTItNDhkNS1hY2QwLWQ5NmFlN2M4ZjAwZiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6Imp1aXoiLCJpYXQiOjE3NTU4Mjc5MDAsImV4cCI6MTc1NTkxNDMwMH0.-Hz9FwXda7n8ckv_ppzQGUs1PbDoGEaD5lYo5JS6mjc
+
+### Chamar piloto para o Box (requer token de integrante)
+POST http://localhost:3000/api/telemetry/pit-call
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZlZTlhNjlmLTViZTItNDhkNS1hY2QwLWQ5NmFlN2M4ZjAwZiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6ImludGVncmFudGUiLCJpYXQiOjE3NTU4Mjk0NTQsImV4cCI6MTc1NTkxNTg1NH0.0vALba94cTr4PpV81-P00Ky5MKFv1itAF4VWvnQudBI
+
+### Testar a exportação de dados em CSV
+GET http://localhost:3000/api/telemetry/export?startDate=2025-08-22T02:01:33Z&endDate=2025-08-22T02:02:39Z&format=csv
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZlZTlhNjlmLTViZTItNDhkNS1hY2QwLWQ5NmFlN2M4ZjAwZiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6ImludGVncmFudGUiLCJpYXQiOjE3NTU4MzAxNDcsImV4cCI6MTc1NTkxNjU0N30.0n9fu-XivSyGz62isId8mw9eurF-6Ue_SagkksJpZIY
+
+### Testar a exportação de dados em PDF
+GET http://localhost:3000/api/telemetry/export?startDate=2025-08-22T02:01:33Z&endDate=2025-08-22T02:02:39Z&format=pdf
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZlZTlhNjlmLTViZTItNDhkNS1hY2QwLWQ5NmFlN2M4ZjAwZiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6ImludGVncmFudGUiLCJpYXQiOjE3NTU4MzAxNDcsImV4cCI6MTc1NTkxNjU0N30.0n9fu-XivSyGz62isId8mw9eurF-6Ue_SagkksJpZIY
+

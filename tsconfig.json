@@ -1,0 +1,14 @@
+{// Dentro do seu arquivo tsconfig.json
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "NodeNext", // Alterado de "commonjs"
+    "moduleResolution": "NodeNext", // Alterado de "nodenext" (ou adicionado)
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true // Adicionado para melhor compatibilidade
+  }
+}
