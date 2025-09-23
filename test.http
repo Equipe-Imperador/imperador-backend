@@ -1,34 +1,8 @@
-### Registrar um novo usuário
-POST http://localhost:3000/api/users/register
+### Registrar um novo usuário (AGORA NA VPS)
+POST http://72.60.141.159:3000/api/users/register
 Content-Type: application/json
 
 {
-  "email": "membro.equipe@imperador.com",
-  "password": "senhaSuperSecreta123"
+  "email": "admin@imbaja.com.br",
+  "password": "imperador25"
 }
-
-### Fazer login com um usuário existente
-POST http://localhost:3000/api/users/login
-Content-Type: application/json
-
-{
-  "email": "membro.equipe@imperador.com",
-  "password": "senhaSuperSecreta123"
-}
-
-### Teste 1: Acessar o perfil COM um token válido
-GET http://localhost:3000/api/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA2YzMxNTFmLTM2ZjEtNGJmYy1iYjAzLWFlMzRkODMyMmRmYiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6ImFkbWluaXN0cmFkb3IiLCJpYXQiOjE3NTU1NjYwMTQsImV4cCI6MTc1NTY1MjQxNH0.7qKCB9cdGvp_sQPqAU5NJe4xDbZKojTCfogyPW0ykxE
-
-### Teste 2: Acessar o perfil SEM um token
-GET http://localhost:3000/api/users/profile
-
-
-### Teste 3: entar acessar a rota de admin com um token de VISITANTE
-GET http://localhost:3000/api/users/admin
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA2YzMxNTFmLTM2ZjEtNGJmYy1iYjAzLWFlMzRkODMyMmRmYiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6InZpc2l0YW50ZSIsImlhdCI6MTc1NTU2NjE0MSwiZXhwIjoxNzU1NjUyNTQxfQ.Iqx9xgYBpySLxQAA-TuwjTI_erEnDK2Y968DK27o1x4
-
-
-### Teste 4: Tentar acessar a rota de admin com um token de ADMINISTRADOR
-GET http://localhost:3000/api/users/admin
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA2YzMxNTFmLTM2ZjEtNGJmYy1iYjAzLWFlMzRkODMyMmRmYiIsImVtYWlsIjoibWVtYnJvLmVxdWlwZUBpbXBlcmFkb3IuY29tIiwicm9sZSI6ImFkbWluaXN0cmFkb3IiLCJpYXQiOjE3NTU1NjYwMTQsImV4cCI6MTc1NTY1MjQxNH0.7qKCB9cdGvp_sQPqAU5NJe4xDbZKojTCfogyPW0ykxE

@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv'; 
 import pool from './db'; // Importa nosso pool de conexão
@@ -11,7 +12,18 @@ const PORT = 3000;
 const app = express();
 
 // Middleware para o Express entender requisições com corpo em JSON
+
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
+
 app.use(express.json());
+
 
 // Rota de teste da conexão com o banco
 app.get('/test-db', async (req, res) => {
@@ -29,7 +41,7 @@ app.get('/test-db', async (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/telemetry', telemetryRoutes); // Usa as rotas de telemetria
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando com sucesso em http://localhost:${PORT}`);
-  startMqttClient(); // Inicia o cliente MQTT quando o servidor Express estiver rodando
+  startMqttClient();
 });
