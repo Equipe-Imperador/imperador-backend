@@ -8,8 +8,8 @@ const brokerUrl = 'mqtt://localhost';
 const options : mqtt.IClientOptions = {
   clientId: `imperador_client_${Math.random().toString(16).slice(2, 8)}`,
   username: 'imperador_mqtt', // O usuário que você criou
-  password: 'imperador25', // A senha que você criou no passo 2
-  reconnectPeriod: 2000, // Tenta reconectar a cada 5 segundos se a conexão cair
+  password: 'imperador25', 
+  reconnectPeriod: 2000, // Tenta reconectar a cada 2 segundos se a conexão cair
 };
 
 
