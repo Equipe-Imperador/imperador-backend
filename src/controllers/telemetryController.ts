@@ -80,24 +80,33 @@ export const getLatestData = async (req: Request, res: Response) => {
 /**
  * Envia um comando 'PIT' para o tópico MQTT de comandos.
  */
+let pitActive = false; // variável de controle no backend
+
 export const callDriverToBox = async (req: Request, res: Response) => {
   try {
+    // alterna estado
+    pitActive = !pitActive;
     const message = {
-      command: 'PIT',
+      command: pitActive ? "PIT" : "RETURN",
       timestamp: new Date().toISOString(),
     };
-    
+
     mqttClient.publish(commandTopic, JSON.stringify(message), (error) => {
       if (error) {
-        throw new Error('Erro ao publicar mensagem MQTT.');
+        throw new Error("Erro ao publicar mensagem MQTT.");
       }
     });
 
-    console.log(`📢 Comando "PIT" enviado para o tópico: "${commandTopic}"`);
-    res.status(200).json({ message: 'Comando para chamar ao box enviado com sucesso.' });
+    console.log(
+      `📢 Comando "${message.command}" enviado para o tópico: "${commandTopic}"`
+    );
+    res.status(200).json({
+      message: `Comando "${message.command}" enviado com sucesso.`,
+      active: pitActive,
+    });
   } catch (error) {
-    console.error('❌ Erro ao enviar comando para o box:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error("❌ Erro ao enviar comando para o box:", error);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
