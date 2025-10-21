@@ -4,6 +4,9 @@ import { mqttClient, commandTopic } from '../services/mqttService';
 import { Parser } from 'json2csv';
 import PDFDocument from 'pdfkit';
 
+
+
+let pitActive = false; // variável de controle no backend
 /**
  * Busca dados de telemetria de um período histórico.
  * Espera 'startDate' e 'endDate' como query params.
@@ -80,7 +83,7 @@ export const getLatestData = async (req: Request, res: Response) => {
 /**
  * Envia um comando 'PIT' para o tópico MQTT de comandos.
  */
-let pitActive = false; // variável de controle no backend
+
 
 export const callDriverToBox = async (req: Request, res: Response) => {
   try {
