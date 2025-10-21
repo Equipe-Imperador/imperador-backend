@@ -118,3 +118,41 @@ export const getAdminData = (req: Request, res: Response) => {
     message: 'Bem-vindo, Administrador! Você está vendo dados secretos.'
   });
 };
+
+// NOVA FUNÇÃO para administradores criarem usuários
+export const adminCreateUser = async (req: Request, res: Response) => {
+  const { email, password, role } = req.body;
+
+  if (!email || !password || !role) {
+    return res.status(400).json({ message: 'Por favor, adicione email, senha e cargo.' });
+  }
+
+  // Validação para garantir que o cargo é um dos permitidos
+  if (role !== 'juiz' && role !== 'integrante') {
+    return res.status(400).json({ message: 'Cargo inválido. Use "juiz" ou "integrante".' });
+  }
+
+  try {
+    const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({ message: 'Usuário já existe.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await pool.query(
+      'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role',
+      [email, hashedPassword, role]
+    );
+
+    res.status(201).json({
+      id: newUser.rows[0].id,
+      email: newUser.rows[0].email,
+      role: newUser.rows[0].role,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};

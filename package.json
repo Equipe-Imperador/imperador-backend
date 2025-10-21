@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "mqtt": "^5.14.0",
     "pdfkit": "^0.17.1",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
@@ -31,6 +32,7 @@
     "@types/node": "^20.12.12",
     "@types/pdfkit": "^0.17.2",
     "@types/pg": "^8.11.6",
+    "@types/ws": "^8.18.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"
   }

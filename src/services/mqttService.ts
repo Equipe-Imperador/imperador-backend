@@ -1,51 +1,84 @@
 import mqtt from 'mqtt';
-import pool from '../db'; // Nosso pool de conexão com o PostgreSQL
+import pool from '../db';
+// A importação do broadcast fica aqui para o futuro, quando reativarmos os WebSockets.
+// import { broadcast } from './webSocketService';
 
-// --- Configuração do Cliente MQTT ---
-// TIRAMOS a criação do cliente para fora da função para que a variável 'client'
-// possa ser exportada e usada em outras partes da nossa aplicação.
-const brokerUrl = 'mqtt://broker.hivemq.com';
-const client = mqtt.connect(brokerUrl);
+const brokerUrl = 'mqtt://localhost';
 
-// --- Tópicos ---
-// Tópico para receber dados do carro
+const options : mqtt.IClientOptions = {
+  clientId: `imperador_client_${Math.random().toString(16).slice(2, 8)}`,
+  username: 'imperador_mqtt', // O usuário que você criou
+  password: 'imperador25', // A senha que você criou no passo 2
+  reconnectPeriod: 2000, // Tenta reconectar a cada 5 segundos se a conexão cair
+};
+
+
+
+
+const client = mqtt.connect(brokerUrl, options);
+
 const telemetryTopic = 'imperador/telemetria';
-// Tópico para enviar comandos para o carro (exportamos para usar no controlador)
 export const commandTopic = 'imperador/comandos/box';
 
-
-// --- Função Principal do Serviço ---
-// Esta função configura os "ouvintes" de eventos (o que fazer quando conecta, recebe msg, etc.)
 export const startMqttClient = () => {
-  // Evento disparado quando a conexão com o broker é bem-sucedida
   client.on('connect', () => {
     console.log('✅ Conectado ao broker MQTT com sucesso!');
-    
-    // Se inscreve no tópico de telemetria para começar a receber as mensagens
-    client.subscribe(telemetryTopic, (err) => {
+    client.subscribe([telemetryTopic, commandTopic], (err) => {
       if (!err) {
         console.log(`📡 Inscrito no tópico: "${telemetryTopic}"`);
-      }
+      } else{
+	console.error ('erro')}
     });
   });
 
-  // Evento disparado toda vez que uma nova mensagem chega nos tópicos inscritos
   client.on('message', async (topic, message) => {
-    // Garantimos que estamos processando apenas mensagens do tópico de telemetria
     if (topic === telemetryTopic) {
       try {
         const dataString = message.toString();
         const data = JSON.parse(dataString);
-        
-        console.log(`📩 Mensagem recebida do tópico "${topic}":`, data);
+	console.log('📩 Mensagem recebida do tópico', topic, ':', message.toString());
 
-        const { rpm, velocity, temperature, battery_level } = data;
+        // broadcast(data); // Envia os dados para o front-end via WebSocket (desativado por agora)
 
+        // Extrai as variáveis do JSON
+        const {
+          tensao_bateria, temperatura_bateria, temp_freio_traseiro,
+          pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
+          rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
+          velocidade_dianteiro_esq, velocidade_dianteiro_dir,
+          temp_oleo_caixa, temp_cvt, pressao_cvt,
+          curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
+          acelerometro_x, acelerometro_y, acelerometro_z
+        } = data;
+
+        // Consulta INSERT corrigida para bater exatamente com as colunas da tabela
         await pool.query(
-          'INSERT INTO telemetry_data (time, rpm, velocity, temperature, battery_level) VALUES (NOW(), $1, $2, $3, $4)',
-          [rpm, velocity, temperature, battery_level]
+          `INSERT INTO telemetry_data (
+            "time", tensao_bateria, temperatura_bateria, temp_freio_traseiro,
+            pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
+            rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
+            velocidade_dianteiro_esq, velocidade_dianteiro_dir,
+            temp_oleo_caixa, temp_cvt, pressao_cvt,
+            curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
+            acelerometro_x, acelerometro_y, acelerometro_z
+          ) VALUES (
+            NOW(), $1, $2, $3, $4, $5, $6,
+            $7, $8, $9, $10, $11,
+            $12, $13, $14,
+            $15, $16, $17,
+            $18, $19, $20
+          )`,
+          [
+            tensao_bateria, temperatura_bateria, temp_freio_traseiro,
+            pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
+            rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
+            velocidade_dianteiro_esq, velocidade_dianteiro_dir,
+            temp_oleo_caixa, temp_cvt, pressao_cvt,
+            curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
+            acelerometro_x, acelerometro_y, acelerometro_z
+          ]
         );
-        
+
         console.log('📊 Novo dado de telemetria recebido e salvo!');
 
       } catch (error) {
@@ -53,15 +86,28 @@ export const startMqttClient = () => {
       }
     }
   });
+   
+  // O que fazer quando a biblioteca tenta reconectar
+  client.on('reconnect', () => {
+    console.log('🟠 Tentando reconectar ao broker MQTT...');
+  });
 
-  // Evento para lidar com erros de conexão
+  // O que fazer quando a conexão é fechada
+  client.on('close', () => {
+    console.log('🔌 Conexão MQTT fechada.');
+  });
+
+  // O que fazer se o cliente ficar offline
+  client.on('offline', () => {
+    console.log('⚫ Cliente MQTT está offline.');
+  });
+
+  
+
+
   client.on('error', (error) => {
     console.error('❌ Erro no cliente MQTT:', error);
-    client.end();
   });
 };
 
-// --- Exportação ---
-// Exportamos a instância do cliente com um nome mais claro para que os controladores
-// possam usá-la para publicar mensagens (ex: chamar o piloto para o box).
 export { client as mqttClient };
