@@ -10,7 +10,13 @@ dotenv.config();
 const PORT = 3000;
 const app = express();
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://192.168.0.3:5173' ]  }));
+
+app.use(cors({
+  origin: ['http://72.60.141.159', 'http://localhost:5173'], // ajuste conforme o ambiente
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json());
 
 app.use('/api/users', userRoutes);

@@ -4,6 +4,9 @@ import { mqttClient, commandTopic } from '../services/mqttService';
 import { Parser } from 'json2csv';
 import PDFDocument from 'pdfkit';
 
+
+
+let pitActive = false;
 /**
  * Busca dados de telemetria de um período histórico.
  * Espera 'startDate' e 'endDate' como query params.
@@ -82,22 +85,33 @@ export const getLatestData = async (req: Request, res: Response) => {
  */
 export const callDriverToBox = async (req: Request, res: Response) => {
   try {
+    // Alterna estado global
+    pitActive = !pitActive;
+    
+    // Define comando com base no novo estado
+    const command = pitActive ? "PIT" : "PISTA";
+
     const message = {
-      command: 'PIT',
+      command,
       timestamp: new Date().toISOString(),
     };
-    
+
     mqttClient.publish(commandTopic, JSON.stringify(message), (error) => {
       if (error) {
-        throw new Error('Erro ao publicar mensagem MQTT.');
+        throw new Error("Erro ao publicar mensagem MQTT.");
       }
     });
 
-    console.log(`📢 Comando "PIT" enviado para o tópico: "${commandTopic}"`);
-    res.status(200).json({ message: 'Comando para chamar ao box enviado com sucesso.' });
+    console.log(`📢 Comando "${command}" enviado para o tópico: "${commandTopic}"`);
+
+    res.status(200).json({
+      message: `Comando "${command}" enviado com sucesso.`,
+      active: pitActive,
+      timestamp: message.timestamp,
+    });
   } catch (error) {
-    console.error('❌ Erro ao enviar comando para o box:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error("❌ Erro ao enviar comando para o box:", error);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
