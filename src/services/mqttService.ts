@@ -60,13 +60,13 @@ export const startMqttClient = () => {
             velocidade_dianteiro_esq, velocidade_dianteiro_dir,
             temp_oleo_caixa, temp_cvt, pressao_cvt,
             curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
-            acelerometro_x, acelerometro_y, acelerometro_z
+            acelerometro_x, acelerometro_y, acelerometro_z, corrente_bateria
           ) VALUES (
             NOW(), $1, $2, $3, $4, $5, $6,
             $7, $8, $9, $10, $11,
             $12, $13, $14,
             $15, $16, $17,
-            $18, $19, $20
+            $18, $19, $20 , $21
           )`,
           [
             tensao_bateria, temperatura_bateria, temp_freio_traseiro,
@@ -75,7 +75,7 @@ export const startMqttClient = () => {
             velocidade_dianteiro_esq, velocidade_dianteiro_dir,
             temp_oleo_caixa, temp_cvt, pressao_cvt,
             curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
-            acelerometro_x, acelerometro_y, acelerometro_z
+            acelerometro_x, acelerometro_y, acelerometro_z, corrente_bateria
           ]
         );
 

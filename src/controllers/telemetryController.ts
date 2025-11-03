@@ -71,7 +71,8 @@ export const getLatestData = async (req: Request, res: Response) => {
             angulo_estercamento: 0,
             acelerometro_x: 0,
             acelerometro_y: 0,
-            acelerometro_z: 0
+            acelerometro_z: 0,
+	    corrente_bateria: 0
           });
         }
     } catch (error) {
