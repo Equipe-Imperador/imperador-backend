@@ -53,26 +53,33 @@ export const getLatestData = async (req: Request, res: Response) => {
           // Retorna um objeto zerado com os novos nomes de colunas
           return res.status(200).json({
             tensao_bateria: 0,
+            corrente_bateria: 0,
             temperatura_bateria: 0,
-            temp_freio_traseiro: 0,
+            //temp_freio_traseiro: 0,
             pressao_freio_traseira: 0,
             pressao_freio_dianteiro: 0,
-            temp_freio_dianteiro: 0,
+            //temp_freio_dianteiro: 0,
             rpm_motor: 0,
-            nivel_combustivel: 0,
+            //nivel_combustivel: 0,
             velocidade_eixo_traseiro: 0,
-            velocidade_dianteiro_esq: 0,
-            velocidade_dianteiro_dir: 0,
-            temp_oleo_caixa: 0,
+            //velocidade_dianteiro_esq: 0,
+            //velocidade_dianteiro_dir: 0,
+            //temp_oleo_caixa: 0,
             temp_cvt: 0,
-            pressao_cvt: 0,
+            //pressao_cvt: 0,
             curso_pedal_acelerador: 0,
             curso_pedal_freio: 0,
-            angulo_estercamento: 0,
+            //angulo_estercamento: 0,
             acelerometro_x: 0,
             acelerometro_y: 0,
             acelerometro_z: 0,
-	    corrente_bateria: 0
+            gyro_x: 0,
+            gyro_y: 0,
+            gyro_z: 0,
+            ang_x: 0,
+            ang_y: 0,
+            ang_z: 0,
+            dif: 0
           });
         }
     } catch (error) {
