@@ -1,14 +1,18 @@
 import mqtt from 'mqtt';
 import pool from '../db';
-// A importação do broadcast fica aqui para o futuro, quando reativarmos os WebSockets.
+
 // import { broadcast } from './webSocketService';
 
-const brokerUrl = 'mqtt://localhost';
+
+const batchBuffer: any[] = [];
+
+
+const brokerUrl = 'mqtt://72.60.141.159';
 
 const options : mqtt.IClientOptions = {
   clientId: `imperador_client_${Math.random().toString(16).slice(2, 8)}`,
-  username: 'imperador_mqtt', // O usuário que você criou
-  password: 'imperador25', // A senha que você criou no passo 2
+  username: 'imperador_mqtt', 
+  password: 'imperador25', 
   reconnectPeriod: 2000, // Tenta reconectar a cada 5 segundos se a conexão cair
 };
 
@@ -36,46 +40,47 @@ export const startMqttClient = () => {
       try {
         const dataString = message.toString();
         const data = JSON.parse(dataString);
-	console.log('📩 Mensagem recebida do tópico', topic, ':', message.toString());
 
-        // broadcast(data); // Envia os dados para o front-end via WebSocket (desativado por agora)
+        // Adiciona mensagem no buffer do batch 
+        batchBuffer.push(data);
+
+	console.log('📩 Mensagem recebida do tópico', topic, ':', message.toString());
+        
+
 
         // Extrai as variáveis do JSON
         const {
-          tensao_bateria, temperatura_bateria, temp_freio_traseiro,
-          pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
-          rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
-          velocidade_dianteiro_esq, velocidade_dianteiro_dir,
-          temp_oleo_caixa, temp_cvt, pressao_cvt,
-          curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
-          acelerometro_x, acelerometro_y, acelerometro_z
+          tensao_bateria, corrente_bateria, temperatura_bateria,
+          pressao_freio_traseira, pressao_freio_dianteiro,
+          rpm_motor, velocidade_eixo_traseiro, temp_cvt,
+          curso_pedal_acelerador, curso_pedal_freio,
+          acelerometro_x, acelerometro_y, acelerometro_z,
+          gyro_x, gyro_y, gyro_z,
+          ang_x, ang_y, ang_z, dif
         } = data;
 
-        // Consulta INSERT corrigida para bater exatamente com as colunas da tabela
+        // Consulta INSERT 
         await pool.query(
           `INSERT INTO telemetry_data (
-            "time", tensao_bateria, temperatura_bateria, temp_freio_traseiro,
-            pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
-            rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
-            velocidade_dianteiro_esq, velocidade_dianteiro_dir,
-            temp_oleo_caixa, temp_cvt, pressao_cvt,
-            curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
-            acelerometro_x, acelerometro_y, acelerometro_z, corrente_bateria
+            "time", tensao_bateria, corrente_bateria, temperatura_bateria,
+            pressao_freio_traseira, pressao_freio_dianteiro,
+            rpm_motor, velocidade_eixo_traseiro, temp_cvt,
+            curso_pedal_acelerador, curso_pedal_freio,
+            acelerometro_x, acelerometro_y, acelerometro_z,
+            gyro_x, gyro_y, gyro_z,
+            ang_x, ang_y, ang_z, dif
           ) VALUES (
-            NOW(), $1, $2, $3, $4, $5, $6,
-            $7, $8, $9, $10, $11,
-            $12, $13, $14,
-            $15, $16, $17,
-            $18, $19, $20 , $21
+            NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+            $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
           )`,
           [
-            tensao_bateria, temperatura_bateria, temp_freio_traseiro,
-            pressao_freio_traseira, pressao_freio_dianteiro, temp_freio_dianteiro,
-            rpm_motor, nivel_combustivel, velocidade_eixo_traseiro,
-            velocidade_dianteiro_esq, velocidade_dianteiro_dir,
-            temp_oleo_caixa, temp_cvt, pressao_cvt,
-            curso_pedal_acelerador, curso_pedal_freio, angulo_estercamento,
-            acelerometro_x, acelerometro_y, acelerometro_z, corrente_bateria
+            tensao_bateria, corrente_bateria, temperatura_bateria,
+            pressao_freio_traseira, pressao_freio_dianteiro,
+            rpm_motor, velocidade_eixo_traseiro, temp_cvt,
+            curso_pedal_acelerador, curso_pedal_freio,
+            acelerometro_x, acelerometro_y, acelerometro_z,
+            gyro_x, gyro_y, gyro_z,
+            ang_x, ang_y, ang_z, dif
           ]
         );
 
@@ -109,5 +114,25 @@ export const startMqttClient = () => {
     console.error('❌ Erro no cliente MQTT:', error);
   });
 };
+
+//logica batch 
+setInterval(async () => {
+  if (batchBuffer.length === 0) return;
+
+  const copy = [...batchBuffer];
+  batchBuffer.length = 0;
+
+  try {
+    await pool.query(
+      `INSERT INTO telemetry_batch (dados)
+       VALUES ($1)`,
+      [JSON.stringify(copy)]
+    );
+
+    console.log(`📦 Batch salvo com ${copy.length} mensagens`);
+  } catch (err) {
+    console.error("❌ Erro ao salvar batch:", err);
+  }
+}, 1000);
 
 export { client as mqttClient };
