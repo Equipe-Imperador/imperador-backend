@@ -1,7 +1,6 @@
 import mqtt from 'mqtt';
 import pool from '../db';
-
-// import { broadcast } from './webSocketService';
+import { broadcast } from './webSocketService';
 
 
 const batchBuffer: any[] = [];
@@ -35,21 +34,44 @@ export const startMqttClient = () => {
     });
   });
 
-  client.on('message', async (topic, message) => {
-    if (topic === telemetryTopic) {
-      try {
-        const dataString = message.toString();
-        const data = JSON.parse(dataString);
+  client.on("message", async (topic, message) => {
+  if (topic === telemetryTopic) {
+    try {
+      const data = JSON.parse(message.toString());
 
-        // Adiciona mensagem no buffer do batch 
-        batchBuffer.push(data);
+      // manda para o front (WebSocket)
+      broadcast(data);
 
-	console.log('📩 Mensagem recebida do tópico', topic, ':', message.toString());
-        
+      // adiciona no buffer para o batch
+      batchBuffer.push(data);
 
+      console.log("📩 Telemetria recebida:", data);
 
-        // Extrai as variáveis do JSON
-        const {
+      // salva no banco individual
+      const {
+        tensao_bateria, corrente_bateria, temperatura_bateria,
+        pressao_freio_traseira, pressao_freio_dianteiro,
+        rpm_motor, velocidade_eixo_traseiro, temp_cvt,
+        curso_pedal_acelerador, curso_pedal_freio,
+        acelerometro_x, acelerometro_y, acelerometro_z,
+        gyro_x, gyro_y, gyro_z,
+        ang_x, ang_y, ang_z, dif
+      } = data;
+
+      await pool.query(
+        `INSERT INTO telemetry_data (
+          "time", tensao_bateria, corrente_bateria, temperatura_bateria,
+          pressao_freio_traseira, pressao_freio_dianteiro,
+          rpm_motor, velocidade_eixo_traseiro, temp_cvt,
+          curso_pedal_acelerador, curso_pedal_freio,
+          acelerometro_x, acelerometro_y, acelerometro_z,
+          gyro_x, gyro_y, gyro_z,
+          ang_x, ang_y, ang_z, dif
+        ) VALUES (
+          NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+        )`,
+        [
           tensao_bateria, corrente_bateria, temperatura_bateria,
           pressao_freio_traseira, pressao_freio_dianteiro,
           rpm_motor, velocidade_eixo_traseiro, temp_cvt,
@@ -57,40 +79,14 @@ export const startMqttClient = () => {
           acelerometro_x, acelerometro_y, acelerometro_z,
           gyro_x, gyro_y, gyro_z,
           ang_x, ang_y, ang_z, dif
-        } = data;
+        ]
+      );
 
-        // Consulta INSERT 
-        await pool.query(
-          `INSERT INTO telemetry_data (
-            "time", tensao_bateria, corrente_bateria, temperatura_bateria,
-            pressao_freio_traseira, pressao_freio_dianteiro,
-            rpm_motor, velocidade_eixo_traseiro, temp_cvt,
-            curso_pedal_acelerador, curso_pedal_freio,
-            acelerometro_x, acelerometro_y, acelerometro_z,
-            gyro_x, gyro_y, gyro_z,
-            ang_x, ang_y, ang_z, dif
-          ) VALUES (
-            NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-            $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
-          )`,
-          [
-            tensao_bateria, corrente_bateria, temperatura_bateria,
-            pressao_freio_traseira, pressao_freio_dianteiro,
-            rpm_motor, velocidade_eixo_traseiro, temp_cvt,
-            curso_pedal_acelerador, curso_pedal_freio,
-            acelerometro_x, acelerometro_y, acelerometro_z,
-            gyro_x, gyro_y, gyro_z,
-            ang_x, ang_y, ang_z, dif
-          ]
-        );
-
-        console.log('📊 Novo dado de telemetria recebido e salvo!');
-
-      } catch (error) {
-        console.error('❌ Erro ao processar mensagem MQTT ou salvar no banco:', error);
-      }
+    } catch (error) {
+      console.error("❌ Erro processando telemetria:", error);
     }
-  });
+  }
+});
    
   // O que fazer quando a biblioteca tenta reconectar
   client.on('reconnect', () => {
