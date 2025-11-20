@@ -86,6 +86,10 @@ export const startMqttClient = () => {
       console.error("❌ Erro processando telemetria:", error);
     }
   }
+	  else if (topic === commandTopic) 
+      console.log("📥 Comando BOX recebido no backend:", message.toString());
+    }
+  });
 });
    
   // O que fazer quando a biblioteca tenta reconectar
