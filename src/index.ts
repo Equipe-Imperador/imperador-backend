@@ -10,7 +10,6 @@ dotenv.config();
 const PORT = 3000;
 const app = express();
 
-
 app.use(cors({
   origin: ['http://72.60.141.159', 'http://localhost:5173'], // ajuste conforme o ambiente
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

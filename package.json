@@ -21,6 +21,8 @@
     "mqtt": "^5.14.0",
     "pdfkit": "^0.17.1",
     "pg": "^8.11.5",
+    "react-uplot": "^0.0.9",
+    "uplot": "^1.6.32",
     "ws": "^8.18.3"
   },
   "devDependencies": {

@@ -8,8 +8,9 @@ import pool from '../db'; // Vamos criar este arquivo de conexão já já
 export const registerUser = async (req: Request, res: Response) => {
   try {
     // 1. Pega o email e a senha do corpo da requisição
-    const { email, password } = req.body;
-
+    // const {email , password } = req.body;
+    const { password} = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : undefined ;
     // Validação simples para garantir que os dados foram enviados
     if (!email || !password) {
       return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
@@ -47,7 +48,8 @@ export const registerUser = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
   try {
     // 1. Pega o email e a senha do corpo da requisição
-    const { email, password } = req.body;
+    const{password}  = req.body;
+    const email =req.body.email ? req.body.email.toLowerCase() : undefined;
 
     // Validação
     if (!email || !password) {

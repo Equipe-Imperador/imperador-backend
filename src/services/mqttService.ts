@@ -86,6 +86,11 @@ export const startMqttClient = () => {
       console.error("❌ Erro processando telemetria:", error);
     }
   }
+	else if (topic === commandTopic) {
+      // 👇 NOVO: logar os comandos de BOX que chegaram no broker
+      console.log("📥 Comando BOX recebido no backend:", message.toString());
+      // se quiser, pode também fazer um broadcast pro WebSocket ou salvar em BD
+    }
 });
    
   // O que fazer quando a biblioteca tenta reconectar
