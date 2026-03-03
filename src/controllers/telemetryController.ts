@@ -50,14 +50,14 @@ export const getLatestData = async (req: Request, res: Response) => {
           const lastUpdate = new Date(lastData.time).getTime();
           const now = new Date().getTime();
           
-          // Se o dado for mais velho que 10 segundos, consideramos o carro "Offline"
+          // Se o dado tiver mais de 10 segundos, retornamos "Sem Conteúdo"
           if (now - lastUpdate > 10000) {
-            return res.status(200).json(getZeroedData());
+            return res.status(204).send(); 
           }
 
           return res.status(200).json(lastData);
         } else {
-          return res.status(200).json(getZeroedData());
+          return res.status(204).send();
         }
     } catch (error) {
         console.error('❌ Erro ao buscar o último dado:', error);
