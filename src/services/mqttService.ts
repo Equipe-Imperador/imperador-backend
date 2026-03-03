@@ -56,7 +56,7 @@ export const startMqttClient = () => {
 
       // Inserção na nova tabela v2
       await pool.query(
-        `INSERT INTO telemetry_data_v2_v2 (
+        `INSERT INTO telemetry_data_v2 (
           "time", rpm, vel, tCVT, vBat, pTras, tBat,
           perT, perF, pedF, pDiant, pCM,
           accX, accY, accZ, vLF, vRF, dif
