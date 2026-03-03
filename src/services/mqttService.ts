@@ -42,48 +42,37 @@ export const startMqttClient = () => {
       // manda para o front (WebSocket)
       broadcast(data);
 
-      // adiciona no buffer para o batch
+      // adiciona no buffer para o batch (mantemos a lógica atual)
       batchBuffer.push(data);
 
-      console.log(" Telemetria recebida:", data);
+      console.log("Telemetria recebida:", data);
 
-      // salva no banco individual
+      // Extração das novas chaves curtas enviadas pelo ESP32
       const {
-        tensao_bateria, corrente_bateria, temperatura_bateria,
-        pressao_freio_traseira, pressao_freio_dianteiro,
-        rpm_motor, velocidade_eixo_traseiro, temp_cvt,
-        curso_pedal_acelerador, curso_pedal_freio,
-        acelerometro_x, acelerometro_y, acelerometro_z,
-        gyro_x, gyro_y, gyro_z,
-        ang_x, ang_y, ang_z, dif
+        rpm, vel, tCVT, vBat, pTras, tBat,
+        perT, perF, pedF, pDiant, pCM,
+        accX, accY, accZ, vLF, vRF, dif
       } = data;
 
+      // Inserção na nova tabela v2
       await pool.query(
-        `INSERT INTO telemetry_data (
-          "time", tensao_bateria, corrente_bateria, temperatura_bateria,
-          pressao_freio_traseira, pressao_freio_dianteiro,
-          rpm_motor, velocidade_eixo_traseiro, temp_cvt,
-          curso_pedal_acelerador, curso_pedal_freio,
-          acelerometro_x, acelerometro_y, acelerometro_z,
-          gyro_x, gyro_y, gyro_z,
-          ang_x, ang_y, ang_z, dif
+        `INSERT INTO telemetry_data_v2 (
+          "time", rpm, vel, tCVT, vBat, pTras, tBat,
+          perT, perF, pedF, pDiant, pCM,
+          accX, accY, accZ, vLF, vRF, dif
         ) VALUES (
           NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+          $11, $12, $13, $14, $15, $16, $17
         )`,
         [
-          tensao_bateria, corrente_bateria, temperatura_bateria,
-          pressao_freio_traseira, pressao_freio_dianteiro,
-          rpm_motor, velocidade_eixo_traseiro, temp_cvt,
-          curso_pedal_acelerador, curso_pedal_freio,
-          acelerometro_x, acelerometro_y, acelerometro_z,
-          gyro_x, gyro_y, gyro_z,
-          ang_x, ang_y, ang_z, dif
+          rpm, vel, tCVT, vBat, pTras, tBat,
+          perT, perF, pedF, pDiant, pCM,
+          accX, accY, accZ, vLF, vRF, dif
         ]
       );
 
     } catch (error) {
-      console.error(" Erro processando telemetria:", error);
+      console.error("Erro a processar telemetria:", error);
     }
   }
 	else if (topic === commandTopic) {
