@@ -4,12 +4,10 @@ import { mqttClient, commandTopic } from '../services/mqttService';
 import { Parser } from 'json2csv';
 import PDFDocument from 'pdfkit';
 
-
-
 let pitActive = false;
+
 /**
  * Busca dados de telemetria de um período histórico.
- * Espera 'startDate' e 'endDate' como query params.
  */
 export const getHistoricalData = async (req: Request, res: Response) => {
   try {
@@ -40,7 +38,7 @@ export const getHistoricalData = async (req: Request, res: Response) => {
 
 /**
  * Busca a leitura de telemetria mais recente.
- * Se a tabela estiver vazia, retorna um objeto com todos os valores zerados.
+ * Implementa trava de 10 segundos para evitar exibição de dados "fantasmas" com carro desligado.
  */
 export const getLatestData = async (req: Request, res: Response) => {
     try {
@@ -48,39 +46,18 @@ export const getLatestData = async (req: Request, res: Response) => {
         const result = await pool.query(query);
 
         if (result.rows.length > 0) {
-          return res.status(200).json(result.rows[0]);
+          const lastData = result.rows[0];
+          const lastUpdate = new Date(lastData.time).getTime();
+          const now = new Date().getTime();
+          
+          // Se o dado for mais velho que 10 segundos, consideramos o carro "Offline"
+          if (now - lastUpdate > 10000) {
+            return res.status(200).json(getZeroedData());
+          }
+
+          return res.status(200).json(lastData);
         } else {
-          // Retorna um objeto zerado com os novos nomes de colunas
-          return res.status(200).json({
-            tensao_bateria: 0,
-            corrente_bateria: 0,
-            temperatura_bateria: 0,
-            //temp_freio_traseiro: 0,
-            pressao_freio_traseira: 0,
-            pressao_freio_dianteiro: 0,
-            //temp_freio_dianteiro: 0,
-            rpm_motor: 0,
-            //nivel_combustivel: 0,
-            velocidade_eixo_traseiro: 0,
-            //velocidade_dianteiro_esq: 0,
-            //velocidade_dianteiro_dir: 0,
-            //temp_oleo_caixa: 0,
-            temp_cvt: 0,
-            //pressao_cvt: 0,
-            curso_pedal_acelerador: 0,
-            curso_pedal_freio: 0,
-            //angulo_estercamento: 0,
-            acelerometro_x: 0,
-            acelerometro_y: 0,
-            acelerometro_z: 0,
-            gyro_x: 0,
-            gyro_y: 0,
-            gyro_z: 0,
-            ang_x: 0,
-            ang_y: 0,
-            ang_z: 0,
-            dif: 0
-          });
+          return res.status(200).json(getZeroedData());
         }
     } catch (error) {
         console.error('❌ Erro ao buscar o último dado:', error);
@@ -89,14 +66,35 @@ export const getLatestData = async (req: Request, res: Response) => {
 };
 
 /**
- * Envia um comando 'PIT' para o tópico MQTT de comandos.
+ * Função auxiliar para retornar o estado zerado com as novas siglas do ESP32
+ */
+const getZeroedData = () => ({
+    rpm: 0,
+    vel: 0,
+    tCVT: 0,
+    vBat: 0,
+    tBat: 0,
+    pDiant: 0,
+    pTras: 0,
+    pCM: 0,
+    vLF: 0,
+    vRF: 0,
+    perT: 0,
+    perF: 0,
+    pedF: 0,
+    accX: 0,
+    accY: 0,
+    accZ: 0,
+    dif: 0,
+    time: new Date().toISOString()
+});
+
+/**
+ * Alterna entre comando PIT e PISTA via MQTT
  */
 export const callDriverToBox = async (req: Request, res: Response) => {
   try {
-    // Alterna estado global
     pitActive = !pitActive;
-    
-    // Define comando com base no novo estado
     const command = pitActive ? "PIT" : "PISTA";
 
     const message = {
@@ -105,12 +103,8 @@ export const callDriverToBox = async (req: Request, res: Response) => {
     };
 
     mqttClient.publish(commandTopic, JSON.stringify(message), (error) => {
-      if (error) {
-        throw new Error("Erro ao publicar mensagem MQTT.");
-      }
+      if (error) throw new Error("Erro ao publicar mensagem MQTT.");
     });
-
-    console.log(`📢 Comando "${command}" enviado para o tópico: "${commandTopic}"`);
 
     res.status(200).json({
       message: `Comando "${command}" enviado com sucesso.`,
@@ -124,32 +118,27 @@ export const callDriverToBox = async (req: Request, res: Response) => {
 };
 
 /**
- * Exporta dados de telemetria em formato CSV ou PDF.
- * Espera 'startDate', 'endDate' e 'format' como query params.
+ * Exporta dados em CSV ou PDF
  */
 export const exportData = async (req: Request, res: Response) => {
   try {
-    const startDate = req.query.startDate as string;
-    const endDate = req.query.endDate as string;
-    const format = req.query.format as string;
+    const { startDate, endDate, format } = req.query as { startDate: string, endDate: string, format: string };
 
     if (!startDate || !endDate || !format) {
-      return res.status(400).json({ message: 'Datas de início, fim e o formato são obrigatórios.' });
+      return res.status(400).json({ message: 'Parâmetros insuficientes.' });
     }
 
-    const query = `
-      SELECT * FROM telemetry_data_v2 
-      WHERE "time" BETWEEN $1 AND $2 
-      ORDER BY "time" ASC;
-    `;
+    const query = 'SELECT * FROM telemetry_data_v2 WHERE "time" BETWEEN $1 AND $2 ORDER BY "time" ASC;';
     const result = await pool.query(query, [startDate, endDate]);
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Nenhum dado encontrado para exportar no período.' });
+      return res.status(404).json({ message: 'Sem dados no período.' });
     }
+
     const data = result.rows;
 
     if (format === 'csv') {
-      const fields = Object.keys(data[0]); // Pega os cabeçalhos dinamicamente do primeiro objeto
+      const fields = Object.keys(data[0]);
       const json2csvParser = new Parser({ fields });
       const csv = json2csvParser.parse(data);
       res.header('Content-Type', 'text/csv');
@@ -157,32 +146,25 @@ export const exportData = async (req: Request, res: Response) => {
       return res.status(200).send(csv);
     } 
     
-    else if (format === 'pdf') {
+    if (format === 'pdf') {
         const doc = new PDFDocument({size: 'A4', layout: 'landscape'});
-        const filename = 'telemetria-imperador.pdf';
-
         res.header('Content-Type', 'application/pdf');
-        res.header('Content-Disposition', `attachment; filename="${filename}"`);
+        res.header('Content-Disposition', 'attachment; filename="telemetria.pdf"');
         
         doc.pipe(res);
         doc.fontSize(16).text('Relatório de Telemetria - Equipe Imperador', { align: 'center' });
         doc.moveDown();
-        doc.fontSize(12).text(`Período: de ${startDate} até ${endDate}`);
-        doc.moveDown(2);
+        doc.fontSize(10).text(`Período: ${startDate} - ${endDate}`);
+        doc.moveDown();
 
-        // Cabeçalhos da Tabela
-        doc.fontSize(8);
         const headers = Object.keys(data[0]);
-        doc.text(headers.join(' | ')); // Simplesmente junta os cabeçalhos
-        doc.text('------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------');
+        doc.fontSize(7).text(headers.join(' | '));
+        doc.text('-'.repeat(160));
 
-        // Linhas de Dados
-        data.forEach(row => {
-          const rowValues = headers.map(header => {
-              const value = row[header];
-              if (value instanceof Date) return value.toLocaleTimeString();
-              if (typeof value === 'number') return value.toFixed(2);
-              return value;
+        data.slice(0, 500).forEach(row => { // Limite de 500 linhas no PDF para não travar
+          const rowValues = headers.map(h => {
+              const val = row[h];
+              return val instanceof Date ? val.toLocaleTimeString() : val;
           });
           doc.text(rowValues.join(' | '));
         });
@@ -191,9 +173,9 @@ export const exportData = async (req: Request, res: Response) => {
         return;
     }
     
-    return res.status(400).json({ message: 'Formato de exportação inválido.' });
+    return res.status(400).json({ message: 'Formato inválido.' });
   } catch (error) {
-    console.error('❌ Erro ao exportar dados:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error('❌ Erro ao exportar:', error);
+    res.status(500).json({ message: 'Erro interno.' });
   }
 };
