@@ -6,10 +6,10 @@ let wss: WebSocketServer;
 export const initializeWebSocketServer = (server: Server) => {
   wss = new WebSocketServer({ server });
 
-  console.log("✅ WebSocket Server iniciado.");
+  console.log(" WebSocket Server iniciado.");
 
   wss.on("connection", (ws: WebSocket) => {
-    console.log("🔗 Cliente conectado no WebSocket.");
+    console.log(" Cliente conectado no WebSocket.");
 
     // Heartbeat para evitar timeouts
     (ws as any).isAlive = true;
@@ -19,7 +19,7 @@ export const initializeWebSocketServer = (server: Server) => {
     });
 
     ws.on("close", () => {
-      console.log("🔌 Cliente desconectado.");
+      console.log(" Cliente desconectado.");
     });
   });
 

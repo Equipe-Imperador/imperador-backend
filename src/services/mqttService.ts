@@ -25,10 +25,10 @@ export const commandTopic = 'imperador/comandos/box';
 
 export const startMqttClient = () => {
   client.on('connect', () => {
-    console.log('✅ Conectado ao broker MQTT com sucesso!');
+    console.log(' Conectado ao broker MQTT com sucesso!');
     client.subscribe([telemetryTopic, commandTopic], (err) => {
       if (!err) {
-        console.log(`📡 Inscrito no tópico: "${telemetryTopic}"`);
+        console.log(` Inscrito no tópico: "${telemetryTopic}"`);
       } else{
 	console.error ('erro')}
     });
@@ -45,7 +45,7 @@ export const startMqttClient = () => {
       // adiciona no buffer para o batch
       batchBuffer.push(data);
 
-      console.log("📩 Telemetria recebida:", data);
+      console.log(" Telemetria recebida:", data);
 
       // salva no banco individual
       const {
@@ -83,43 +83,36 @@ export const startMqttClient = () => {
       );
 
     } catch (error) {
-      console.error("❌ Erro processando telemetria:", error);
+      console.error(" Erro processando telemetria:", error);
     }
   }
-<<<<<<< HEAD
 	else if (topic === commandTopic) {
-      // 👇 NOVO: logar os comandos de BOX que chegaram no broker
-      console.log("📥 Comando BOX recebido no backend:", message.toString());
+      // NOVO: logar os comandos de BOX que chegaram no broker
+      console.log(" Comando BOX recebido no backend:", message.toString());
       // se quiser, pode também fazer um broadcast pro WebSocket ou salvar em BD
     }
-=======
-	  else if (topic === commandTopic) 
-      console.log("📥 Comando BOX recebido no backend:", message.toString());
-    }
-  });
->>>>>>> 00ba9dc6aad7e552608c3c13b78506582fb75749
 });
    
   // O que fazer quando a biblioteca tenta reconectar
   client.on('reconnect', () => {
-    console.log('🟠 Tentando reconectar ao broker MQTT...');
+    console.log(' Tentando reconectar ao broker MQTT...');
   });
 
   // O que fazer quando a conexão é fechada
   client.on('close', () => {
-    console.log('🔌 Conexão MQTT fechada.');
+    console.log(' Conexão MQTT fechada.');
   });
 
   // O que fazer se o cliente ficar offline
   client.on('offline', () => {
-    console.log('⚫ Cliente MQTT está offline.');
+    console.log(' Cliente MQTT está offline.');
   });
 
   
 
 
   client.on('error', (error) => {
-    console.error('❌ Erro no cliente MQTT:', error);
+    console.error(' Erro no cliente MQTT:', error);
   });
 };
 
@@ -137,9 +130,9 @@ setInterval(async () => {
       [JSON.stringify(copy)]
     );
 
-    console.log(`📦 Batch salvo com ${copy.length} mensagens`);
+    console.log(` Batch salvo com ${copy.length} mensagens`);
   } catch (err) {
-    console.error("❌ Erro ao salvar batch:", err);
+    console.error(" Erro ao salvar batch:", err);
   }
 }, 1000);
 
