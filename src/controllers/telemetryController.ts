@@ -21,7 +21,7 @@ export const getHistoricalData = async (req: Request, res: Response) => {
     }
 
     const query = `
-      SELECT * FROM telemetry_data 
+      SELECT * FROM telemetry_data_v2 
       WHERE "time" BETWEEN $1 AND $2 
       ORDER BY "time" ASC;
     `;
@@ -44,7 +44,7 @@ export const getHistoricalData = async (req: Request, res: Response) => {
  */
 export const getLatestData = async (req: Request, res: Response) => {
     try {
-        const query = 'SELECT * FROM telemetry_data ORDER BY "time" DESC LIMIT 1;';
+        const query = 'SELECT * FROM telemetry_data_v2 ORDER BY "time" DESC LIMIT 1;';
         const result = await pool.query(query);
 
         if (result.rows.length > 0) {
@@ -138,7 +138,7 @@ export const exportData = async (req: Request, res: Response) => {
     }
 
     const query = `
-      SELECT * FROM telemetry_data 
+      SELECT * FROM telemetry_data_v2 
       WHERE "time" BETWEEN $1 AND $2 
       ORDER BY "time" ASC;
     `;
