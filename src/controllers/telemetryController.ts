@@ -75,3 +75,40 @@ export const exportData = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Erro na exportação.' });
   }
 };
+
+// --- NOVOS CONTROLADORES DE ACIONAMENTO ---
+
+export const toggleDifferential = async (req: Request, res: Response) => {
+  try {
+    // O frontend enviará o estado desejado no corpo da requisição { "estado": true/false }
+    const { estado } = req.body; 
+    
+    if (typeof estado !== 'boolean') {
+      return res.status(400).json({ message: 'O campo "estado" deve ser booleano (true/false).' });
+    }
+
+    const payload = { acionamentoDif: estado, timestamp: new Date().toISOString() };
+    mqttClient.publish(commandTopic, JSON.stringify(payload));
+    
+    res.status(200).json({ message: `Comando Diferencial enviado: ${estado ? 'LIGAR' : 'DESLIGAR'}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao acionar diferencial.' });
+  }
+};
+
+export const toggleHorn = async (req: Request, res: Response) => {
+  try {
+    const { estado } = req.body;
+    
+    if (typeof estado !== 'boolean') {
+      return res.status(400).json({ message: 'O campo "estado" deve ser booleano (true/false).' });
+    }
+
+    const payload = { acionamentoBuzina: estado, timestamp: new Date().toISOString() };
+    mqttClient.publish(commandTopic, JSON.stringify(payload));
+    
+    res.status(200).json({ message: `Comando Buzina enviado: ${estado ? 'LIGAR' : 'DESLIGAR'}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao acionar buzina.' });
+  }
+};

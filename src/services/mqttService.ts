@@ -21,7 +21,8 @@ const options : mqtt.IClientOptions = {
 const client = mqtt.connect(brokerUrl, options);
 
 const telemetryTopic = 'imperador/telemetria';
-export const commandTopic = 'imperador/comandos/box';
+export const commandTopic = 'imperador/comandos/box'; // acionamento 
+
 
 export const startMqttClient = () => {
   client.on('connect', () => {
