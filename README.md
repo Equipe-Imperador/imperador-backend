@@ -1,7 +1,8 @@
 <div align="center">
 
-[<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a1a2e,50:c62a2a,100:e96c00&height=180&section=header&text=Imperador%20Backend&fontSize=40&fontColor=ffffff&fontAlignY=38&desc=Telemetry%20Server%20%7C%20Baja%20SAE%20Imperador&descAlignY=58&descSize=16&animation=fadeIn" width="100%"/>](https://capsule-render.vercel.app/api?type=waving&color=0:0d1b2a,50:8B6914,100:C9A84C&height=180&section=header&text=Imperador%20Frontend&fontSize=40&fontColor=ffffff&fontAlignY=38&desc=Real-Time%20Telemetry%20Dashboard%20%7C%20Baja%20SAE%20Imperador&descAlignY=58&descSize=16&animation=fadeIn)
-
+<div align="center">
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1b2a,50:1b3a5c,100:0a2647&height=180&section=header&text=Imperador%20Backend&fontSize=40&fontColor=ffffff&fontAlignY=38&desc=Telemetry%20Server%20%7C%20Baja%20SAE%20Imperador&descAlignY=58&descSize=16&animation=fadeIn" width="100%"/>
+  
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![MQTT](https://img.shields.io/badge/MQTT-660066?style=for-the-badge&logo=mqtt&logoColor=white)
