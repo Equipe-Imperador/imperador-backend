@@ -1,8 +1,0 @@
-### Registrar um novo usuário (AGORA NA VPS)
-POST http://72.60.141.159:3000/api/users/register
-Content-Type: application/json
-
-{
-  "email": "admin@imbaja.com.br",
-  "password": "imperador25"
-}
